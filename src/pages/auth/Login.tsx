@@ -3,7 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Layout } from "@/components/layout/Layout";
 import { useToast } from "@/hooks/use-toast";
@@ -11,7 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<'client' | 'ca'>('client');
+  const [role, setRole] = useState<"client" | "ca">("client");
+  const [caId, setCaId] = useState(""); // 🆕 CA ID state
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -20,19 +27,30 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login
+    // Simulated login delay
     setTimeout(() => {
       if (email && password) {
+        // Validate CA ID if role is 'ca'
+        if (role === "ca" && !caId.trim()) {
+          toast({
+            title: "Missing CA ID",
+            description: "Please enter your CA ID to continue.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
         toast({
           title: "Login successful",
           description: `Welcome back! Redirecting to your ${role} dashboard.`,
         });
-        
+
         // Redirect based on role
-        if (role === 'client') {
-          navigate('/client/browse');
+        if (role === "client") {
+          navigate("/client/browse");
         } else {
-          navigate('/ca/dashboard');
+          navigate("/ca/dashboard");
         }
       } else {
         toast({
@@ -61,7 +79,7 @@ export default function Login() {
                 <Label htmlFor="role">I am a</Label>
                 <RadioGroup
                   value={role}
-                  onValueChange={(value: 'client' | 'ca') => setRole(value)}
+                  onValueChange={(value: "client" | "ca") => setRole(value)}
                   className="flex space-x-6"
                 >
                   <div className="flex items-center space-x-2">
@@ -98,6 +116,21 @@ export default function Login() {
                   required
                 />
               </div>
+
+              {/* 🆕 Show CA ID input only when role is "ca" */}
+              {role === "ca" && (
+                <div className="space-y-2">
+                  <Label htmlFor="caId">CA ID</Label>
+                  <Input
+                    id="caId"
+                    type="text"
+                    placeholder="Enter your CA ID"
+                    value={caId}
+                    onChange={(e) => setCaId(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
 
               <Button
                 type="submit"

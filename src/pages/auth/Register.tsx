@@ -16,6 +16,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<'client' | 'ca'>(searchParams.get('role') as 'client' | 'ca' || 'client');
+  const [caId, setCaId] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
@@ -42,6 +43,15 @@ export default function Register() {
       return;
     }
 
+    if (role === 'ca' && !caId.trim()) {
+      toast({
+        title: "CA ID required",
+        description: "Please enter your CA ID to register as a Chartered Accountant.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     // Simulate registration
@@ -50,13 +60,13 @@ export default function Register() {
         title: "Registration successful",
         description: `Welcome to CA Connect! Setting up your ${role} account.`,
       });
-      
-      // Redirect based on role
+
       if (role === 'client') {
         navigate('/client/browse');
       } else {
         navigate('/ca/dashboard');
       }
+
       setIsLoading(false);
     }, 1500);
   };
@@ -114,6 +124,20 @@ export default function Register() {
                   required
                 />
               </div>
+
+              {role === 'ca' && (
+                <div className="space-y-2">
+                  <Label htmlFor="caId">CA ID</Label>
+                  <Input
+                    id="caId"
+                    type="text"
+                    placeholder="Enter your CA ID"
+                    value={caId}
+                    onChange={(e) => setCaId(e.target.value)}
+                    required={role === 'ca'}
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
